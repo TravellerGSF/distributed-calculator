@@ -1,0 +1,35 @@
+services:
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - calc_network
+
+  orchestrator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - ORCHESTRATOR_URL=http://localhost:8080
+    networks:
+      - calc_network
+
+  agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - orchestrator
+      - redis
+    environment:
+      - ORCHESTRATOR_URL=http://orchestrator:8080
+      - COMPUTING_POWER=2
+    networks:
+      - calc_network
+
+networks:
+  calc_network:
+    driver: bridge
